@@ -1,0 +1,17 @@
+{
+  "name": "exoshader",
+  "main": "./lib/exoshader",
+  "version": "0.0.0",
+  "description": "Shows status for exovoid GLSL shader viewer",
+  "activationCommands": {
+    "atom-workspace": "exoshader:toggle"
+  },
+  "repository": "https://github.com/atom/exoshader",
+  "license": "MIT",
+  "engines": {
+    "atom": ">=0.174.0 <2.0.0"
+  },
+  "dependencies": {
+    "figlet": "1.1.0"
+  }
+}
