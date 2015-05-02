@@ -11,26 +11,49 @@ module.exports = Exoshader =
     @subscriptions = new CompositeDisposable
     # Register command that toggles this view
     @subscriptions.add atom.commands.add 'atom-workspace', "exoshader:testinsert", => @testinsert()
-    @subscriptions.add atom.commands.add 'atom-workspace', "exo
-    testconvert", => @testconvert()
+    @subscriptions.add atom.commands.add 'atom-workspace', "exoshader:testconvert", => @testconvert()
 
     @editorsSubscription = atom.workspace.observeTextEditors (editor) =>
       disposable = editor.onDidSave =>
-        console.log("FILE was saved must check status of shader!");
+        @updatedSelectedFile(editor)
+      disposable = editor.onDidChangePath =>
+        @updatedSelectedFile(editor)
 
-        #loopme = 0
-        #do checkLoop = ->
-        #  console.log("CheckLoop:"+loopme)
-        #  loopme += 1
-        #  setTimeout checkLoop, 500 unless loopme > 4
 
-        #@checkServer()
-        #Try aagain 1 second later, 2 seconds later too in case app takes time
-        @statusMessage.textContent = "..."
 
-        setTimeout @checkServer(), 1000
-        setTimeout @checkServer(), 2000
-        setTimeout @checkServer(), 3000
+  updatedSelectedFile: (editor)->
+
+        fext =path.extname(editor.getPath())
+        if  fext is ".fs" or fext is ".fsh"
+          #editor.setGrammar(atom.grammars.grammarForScopeName('source.smarty'))
+          console.log("FILE was saved must check status of shader! File:"+editor.getPath());
+
+
+          #loopme = 0
+          #do checkLoop = ->
+          #  console.log("CheckLoop:"+loopme)
+          #  loopme += 1
+          #  setTimeout checkLoop, 500 unless loopme > 4
+
+          #@checkServer()
+          #Try aagain 1 second later, 2 seconds later too in case app takes time
+          @statusMessage.textContent = "..."
+
+          @changeFileOnServer(editor.getPath())
+
+
+
+          setTimeout @checkServer(), 1000
+          setTimeout @checkServer(), 2000
+          setTimeout @checkServer(), 3000
+        else
+         console.log("exoshader ignoring file save with extension:"+fext)
+
+  changeFileOnServer: (fpath)->
+        theUrl = 'http://localhost:55556/loadshader/'+encodeURI(fpath)
+        xhr = new XMLHttpRequest
+        xhr.open "GET", theUrl, true
+        xhr.send();
 
 
   checkServer:->
@@ -75,7 +98,7 @@ module.exports = Exoshader =
                 else
                     error = true
                     this.daddy.statusMessage.textContent = " SHADER: NOSRV :-("
-                
+
                 #swap color class in case of error
                 this.daddy.statusMessage.classList.remove('shaderOK')
                 this.daddy.statusMessage.classList.remove('shaderError')
