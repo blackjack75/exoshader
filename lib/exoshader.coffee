@@ -17,6 +17,17 @@ module.exports = Exoshader =
       disposable = editor.onDidSave =>
         console.log("FILE was saved must check status of shader!");
 
+        #loopme = 0
+        #do checkLoop = ->
+        #  console.log("CheckLoop:"+loopme)
+        #  loopme += 1
+        #  setTimeout checkLoop, 500 unless loopme > 4
+
+        @checkServer()
+        #setTimeout @checkLoop(), 1000
+
+
+  checkServer:->
 
         @statusMessage.textContent = "..."
 
@@ -31,11 +42,27 @@ module.exports = Exoshader =
                     console.log "Server replied"
                     response = JSON.parse xhr.responseText
                     console.log response
-                    this.daddy.statusMessage.textContent = " SHADER: "+response['Status']
+
+                    txt = response['Status']
+                    this.daddy.statusMessage.textContent = " SHADER: "+txt
+                    console.log "Status is:"+txt
+
+
+                    #Error shows as "ERROR: 0:22:'some message'"
+                    if txt.indexOf("ERROR:")!=-1
+                      parts = txt.split(':')
+                      if parts.length > 3
+                        pos = parts[2]
+                        console.log("Error in shader at line:"+pos)
+                        editor = atom.workspace.getActivePaneItem()
+                        editor.setCursorBufferPosition([pos-1,0])
+                      else
+                        console.log("wrong number of parts in error "+parts.length)
+
                 else
                     this.daddy.statusMessage.textContent = " SHADER: NOSRV :-("
 
-        xhr.send(); 
+        xhr.send();
 
         #buffer = editor.getBuffer()
         #return unless buffer.isModified()
