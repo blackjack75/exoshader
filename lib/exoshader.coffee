@@ -37,20 +37,23 @@ module.exports = Exoshader =
 
           #@checkServer()
           #Try aagain 1 second later, 2 seconds later too in case app takes time
-          @statusMessage.textContent = "..."
+          @statusMessage.textContent = " Server is reloading..."
 
           @changeFileOnServer(editor.getPath())
 
-
-          setTimeout(@checkServer(), 1000)
-          setTimeout(@checkServer(), 2000)
-          setTimeout(@checkServer(), 3000)
         else
          console.log("exoshader ignoring file save with extension:"+fext)
 
   changeFileOnServer: (fpath)->
         theUrl = 'http://localhost:55556/loadshader/'+encodeURI(fpath)
         xhr = new XMLHttpRequest
+        xhr.daddy = this
+        xhr.onreadystatechange = ->
+            if xhr.readyState is 4
+              error = false
+            if xhr.status is 200
+              this.daddy.checkServer()
+
         xhr.open "GET", theUrl, true
         xhr.send();
 
@@ -87,23 +90,22 @@ module.exports = Exoshader =
                       txt ="PARSERRRO"+err
                       error true
 
-                    this.daddy.statusMessage.textContent = " SHADER "+txt
+                    xhr.daddy.statusMessage.textContent = " SHADER "+txt
                     console.log "Status is:"+txt
-
 
 
                 else
                     error = true
-                    this.daddy.statusMessage.textContent = " SHADER: NOSRV :-("
+                    xhr.daddy.statusMessage.textContent = " SHADER: NOSRV :-("
 
                 #swap color class in case of error
-                this.daddy.statusMessage.classList.remove('shaderOK')
-                this.daddy.statusMessage.classList.remove('shaderError')
+                xhr.daddy.statusMessage.classList.remove('shaderOK')
+                xhr.daddy.statusMessage.classList.remove('shaderError')
 
                 if error
-                      this.daddy.statusMessage.classList.add('shaderError')
+                      xhr.daddy.statusMessage.classList.add('shaderError')
                 else
-                      this.daddy.statusMessage.classList.add('shaderOK')
+                      xhr.daddy.statusMessage.classList.add('shaderOK')
 
 
 
