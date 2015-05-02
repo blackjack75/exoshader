@@ -11,7 +11,8 @@ module.exports = Exoshader =
     @subscriptions = new CompositeDisposable
     # Register command that toggles this view
     @subscriptions.add atom.commands.add 'atom-workspace', "exoshader:testinsert", => @testinsert()
-    @subscriptions.add atom.commands.add 'atom-workspace', "exoshader:testconvert", => @testconvert()
+    @subscriptions.add atom.commands.add 'atom-workspace', "exo
+    testconvert", => @testconvert()
 
     @editorsSubscription = atom.workspace.observeTextEditors (editor) =>
       disposable = editor.onDidSave =>
@@ -43,13 +44,16 @@ module.exports = Exoshader =
         xhr.onreadystatechange = ->
             if xhr.readyState is 4
                 if xhr.status is 200
-                    console.log "Server replied"
-                    response = JSON.parse xhr.responseText
-                    console.log response
+                    console.log "Server replied with"+xhr.responseText
+                    try
+                      response = JSON.parse xhr.responseText
+                      txt = response['Status']
+                    catch err
+                      console.log("JSON parse %s", err);
+                      txt ="PARSERRRO"+err
 
-                    txt = response['Status']
-                    this.daddy.statusMessage.textContent = " SHADER: "+txt
-                    console.log "Status is:"+txt
+                    this.daddy.statusMessage.textContent = " SHADER "+txt
+                    console.log "Status is:"+txt 
 
 
                     #Error shows as "ERROR: 0:22:'some message'"
