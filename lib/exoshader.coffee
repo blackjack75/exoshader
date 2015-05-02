@@ -51,8 +51,13 @@ module.exports = Exoshader =
         xhr.onreadystatechange = ->
             if xhr.readyState is 4
               error = false
-            if xhr.status is 200
-              this.daddy.checkServer()
+              if xhr.status is 200
+                 this.daddy.checkServer()
+              else
+                error=true
+
+              if error
+                xhr.daddy.statusMessage.textContent = " SHADER: NOSRV :-("
 
         xhr.open "GET", theUrl, true
         xhr.send();
