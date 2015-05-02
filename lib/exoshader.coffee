@@ -43,32 +43,50 @@ module.exports = Exoshader =
         xhr.open "GET", theUrl, true
         xhr.onreadystatechange = ->
             if xhr.readyState is 4
+                error = false
                 if xhr.status is 200
                     console.log "Server replied with"+xhr.responseText
                     try
                       response = JSON.parse xhr.responseText
                       txt = response['Status']
+
+                      #Error shows as "ERROR: 0:22:'some message'"
+                      if txt.indexOf("ERROR:")!=-1
+                        error=true
+                        parts = txt.split(':')
+                        if parts.length > 3
+                          pos = parts[2]
+                          console.log("Error in shader at line:"+pos)
+                          editor = atom.workspace.getActivePaneItem()
+                          editor.setCursorBufferPosition([pos-1,0])
+                        else
+                          console.log("wrong number of parts in error "+parts.length)
+
                     catch err
                       console.log("JSON parse %s", err);
                       txt ="PARSERRRO"+err
+                      error true
 
                     this.daddy.statusMessage.textContent = " SHADER "+txt
-                    console.log "Status is:"+txt 
+                    console.log "Status is:"+txt
 
 
-                    #Error shows as "ERROR: 0:22:'some message'"
-                    if txt.indexOf("ERROR:")!=-1
-                      parts = txt.split(':')
-                      if parts.length > 3
-                        pos = parts[2]
-                        console.log("Error in shader at line:"+pos)
-                        editor = atom.workspace.getActivePaneItem()
-                        editor.setCursorBufferPosition([pos-1,0])
-                      else
-                        console.log("wrong number of parts in error "+parts.length)
 
                 else
+                    error = true
                     this.daddy.statusMessage.textContent = " SHADER: NOSRV :-("
+                
+                #swap color class in case of error
+                this.daddy.statusMessage.classList.remove('shaderOK')
+                this.daddy.statusMessage.classList.remove('shaderError')
+
+                if error
+                      this.daddy.statusMessage.classList.add('shaderError')
+                else
+                      this.daddy.statusMessage.classList.add('shaderOK')
+
+
+
 
         xhr.send();
 
@@ -100,10 +118,10 @@ module.exports = Exoshader =
   consumeStatusBar: (statusBar) ->
     console.log("setting statusbar content");
 
-    # Create message element
+    # Create message element in statusBar so we can update it later on save
     message = document.createElement('span')
     message.textContent = "..."
-    message.classList.add('shaderInfo')
+    message.classList.add('shaderOK')
     @statusMessage = message
     statusBar.addRightTile(item: message, priority: 100)
     @checkServer()
