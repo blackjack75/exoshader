@@ -23,13 +23,17 @@ module.exports = Exoshader =
         #  loopme += 1
         #  setTimeout checkLoop, 500 unless loopme > 4
 
-        @checkServer()
-        #setTimeout @checkLoop(), 1000
+        #@checkServer()
+        #Try aagain 1 second later, 2 seconds later too in case app takes time
+        @statusMessage.textContent = "..."
+
+        setTimeout @checkServer(), 1000
+        setTimeout @checkServer(), 2000
+        setTimeout @checkServer(), 3000
 
 
   checkServer:->
 
-        @statusMessage.textContent = "..."
 
         #request.get { uri:, json: true }, (err, r, body) -> results = body
         theUrl = 'http://localhost:55556/status'
@@ -94,11 +98,11 @@ module.exports = Exoshader =
 
     # Create message element
     message = document.createElement('span')
-    message.textContent = "SHADER INFO on next save"
+    message.textContent = "..."
     message.classList.add('shaderInfo')
     @statusMessage = message
     statusBar.addRightTile(item: message, priority: 100)
-
+    @checkServer()
 
   deactivate: ->
     @subscriptions.dispose()
