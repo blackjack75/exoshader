@@ -1,5 +1,9 @@
 # exoshader package
 
-Just playing with an atom package for exovoid shader editor - there's nothing to see here, I am learning :-)
+This is an atom package to communicate with exovoid's GLSL viewer.
 
-![A screenshot of your package](https://f.cloud.github.com/assets/69169/2290250/c35d867a-a017-11e3-86be-cd7c5bf3ff9b.gif)
+It should display the line of the error in the fragment currently loaded
+
+This is absolutely a work in progress. At the time of this writer I am neither good at GLSL nor at Atom Packages :-)
+
+![A screenshot of your package](https://github.com/blackjack75/exoshader/blob/master/doc/exoshader-screenshot.png?raw=true)
