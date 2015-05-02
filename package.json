@@ -1,7 +1,7 @@
 {
   "name": "exoshader",
   "main": "./lib/exoshader",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Shows status for exovoid GLSL shader viewer (work in progress)",
   "activationCommands": {
     "atom-workspace": "exoshader:toggle"
