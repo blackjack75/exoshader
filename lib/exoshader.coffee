@@ -42,10 +42,9 @@ module.exports = Exoshader =
           @changeFileOnServer(editor.getPath())
 
 
-
-          setTimeout @checkServer(), 1000
-          setTimeout @checkServer(), 2000
-          setTimeout @checkServer(), 3000
+          setTimeout(@checkServer(), 1000)
+          setTimeout(@checkServer(), 2000)
+          setTimeout(@checkServer(), 3000)
         else
          console.log("exoshader ignoring file save with extension:"+fext)
 
@@ -57,8 +56,6 @@ module.exports = Exoshader =
 
 
   checkServer:->
-
-
         #request.get { uri:, json: true }, (err, r, body) -> results = body
         theUrl = 'http://localhost:55556/status'
         xhr = new XMLHttpRequest
