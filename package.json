@@ -7,7 +7,7 @@
     "atom-workspace": "exoshader:toggle"
   },
 
-  "repository": "https://github.com/atom/exoshader",
+  "repository": "https://github.com/blackjack75/exoshader",
   "license": "MIT",
   "engines": {
     "atom": ">=0.174.0 <2.0.0"
