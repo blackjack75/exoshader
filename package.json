@@ -1,10 +1,9 @@
 {
   "name": "exoshader",
   "main": "./lib/exoshader",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Shows status for exovoid GLSL shader viewer (work in progress)",
-  "activationCommands": {
-  },
+  "activationCommands": {},
   "repository": "https://github.com/blackjack75/exoshader",
   "license": "MIT",
   "engines": {
