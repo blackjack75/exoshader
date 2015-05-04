@@ -25,13 +25,13 @@ module.exports = Exoshader =
         @updatedSelectedFile(editor)
 
     @panesSubscription = atom.workspace.onDidChangeActivePaneItem (event) =>
-      console.log "Exoshader - Changed active panel"
+      #console.log "Exoshader - Changed active panel"
       @forceFileUpdate()
 
 
   forceFileUpdate: ->
     editor = atom.workspace.getActivePaneItem()
-    console.log "Exoshader - force file update:"+editor.getPath()
+    #console.log "Exoshader - force file update:"+editor.getPath()
     @updatedSelectedFile(editor)
 
 
@@ -43,7 +43,7 @@ module.exports = Exoshader =
         fext =path.extname(editor.getPath())
         if  fext is ".fs" or fext is ".fsh"
           #editor.setGrammar(atom.grammars.grammarForScopeName('source.smarty'))
-          console.log("FILE was saved must check status of shader! File:"+editor.getPath());
+          console.log("exoShader - Updating File:"+editor.getPath());
 
 
           #loopme = 0
@@ -62,80 +62,68 @@ module.exports = Exoshader =
          console.log("exoshader ignoring file save with extension:"+fext)
 
   changeFileOnServer: (fpath)->
+        console.log "exoshader - notifying server of file change"
         theUrl = 'http://localhost:55556/loadshader/'+encodeURI(fpath)
         xhr = new XMLHttpRequest
         xhr.daddy = this
         xhr.onreadystatechange = ->
-            if xhr.readyState is 4
-              error = false
-              if xhr.status is 200
-                 this.daddy.checkServer()
-              else
-                error=true
-
-              if error
-                xhr.daddy.statusMessage.textContent = " SHADER: NOSRV :-("
-
+            xhr.daddy.handleAnswer(xhr)
         xhr.open "GET", theUrl, true
         xhr.send();
 
-
   checkServer:->
+        console.log "exoshader - asking server for file status"
         #request.get { uri:, json: true }, (err, r, body) -> results = body
         theUrl = 'http://localhost:55556/status'
         xhr = new XMLHttpRequest
         xhr.daddy = this
         xhr.open "GET", theUrl, true
         xhr.onreadystatechange = ->
-            if xhr.readyState is 4
-                error = false
-                if xhr.status is 200
-                    console.log "Server replied with"+xhr.responseText
-                    try
-                      response = JSON.parse xhr.responseText
-                      txt = response['Status']
-
-                      #Error shows as "ERROR: 0:22:'some message'"
-                      if txt.indexOf("ERROR:")!=-1
-                        error=true
-                        parts = txt.split(':')
-                        if parts.length > 3
-                          pos = parts[2]
-                          console.log("Error in shader at line:"+pos)
-                          editor = atom.workspace.getActivePaneItem()
-                          editor.setCursorBufferPosition([pos,0])
-                        else
-                          console.log("wrong number of parts in error "+parts.length)
-
-                    catch err
-                      console.log("JSON parse %s", err);
-                      txt ="PARSERRRO"+err
-                      error true
-
-                    xhr.daddy.statusMessage.textContent = " SHADER "+txt
-                    console.log "Status is:"+txt
-
-
-                else
-                    error = true
-                    xhr.daddy.statusMessage.textContent = " SHADER: NOSRV :-("
-
-                #swap color class in case of error
-                xhr.daddy.statusMessage.classList.remove('shaderOK')
-                xhr.daddy.statusMessage.classList.remove('shaderError')
-
-                if error
-                      xhr.daddy.statusMessage.classList.add('shaderError')
-                else
-                      xhr.daddy.statusMessage.classList.add('shaderOK')
-
-
-
-
+            xhr.daddy.handleAnswer(xhr)
         xhr.send();
 
-        #buffer = editor.getBuffer()
-        #return unless buffer.isModified()
+  handleAnswer: (xhr)->
+    if xhr.readyState is 4
+        error = false
+        if xhr.status is 200
+            console.log "Server replied with"+xhr.responseText
+            try
+              response = JSON.parse xhr.responseText
+              txt = response['Status']
+
+              #Error shows as "ERROR: 0:22:'some message'"
+              if txt.indexOf("ERROR:")!=-1
+                error=true
+                parts = txt.split(':')
+                if parts.length > 3
+                  pos = parts[2]
+                  console.log("Error in shader at line:"+pos)
+                  editor = atom.workspace.getActivePaneItem()
+                  editor.setCursorBufferPosition([pos,0])
+                else
+                  console.log("wrong number of parts in error "+parts.length)
+
+            catch err
+              console.log("JSON parse %s", err);
+              txt ="PARSERRRO"+err
+              error true
+
+            xhr.daddy.statusMessage.textContent = " SHADER "+txt
+            console.log "Status is:"+txt
+
+
+        else
+            error = true
+            xhr.daddy.statusMessage.textContent = " SHADER: NOSRV :-("
+
+        #swap color class in case of error
+        xhr.daddy.statusMessage.classList.remove('shaderOK')
+        xhr.daddy.statusMessage.classList.remove('shaderError')
+
+        if error
+              xhr.daddy.statusMessage.classList.add('shaderError')
+        else
+              xhr.daddy.statusMessage.classList.add('shaderOK')
 
 
 
