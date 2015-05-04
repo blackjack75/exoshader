@@ -2,6 +2,8 @@
 
 
 module.exports = Exoshader =
+  editorsSubscription: null
+  panesSubscription: null
   subscriptions: null
   statusMessage: null
 
@@ -10,18 +12,33 @@ module.exports = Exoshader =
     console.log("exoshader  Activated, adding commands")
     @subscriptions = new CompositeDisposable
     # Register command that toggles this view
+    @subscriptions.add atom.commands.add 'atom-workspace', "exoshader:reloadview", => @forceFileUpdate()
     @subscriptions.add atom.commands.add 'atom-workspace', "exoshader:testinsert", => @testinsert()
     @subscriptions.add atom.commands.add 'atom-workspace', "exoshader:testconvert", => @testconvert()
 
     @editorsSubscription = atom.workspace.observeTextEditors (editor) =>
+      disposable = editor.onDidChangePath =>
+        @updatedSelectedFile(editor)
       disposable = editor.onDidSave =>
         @updatedSelectedFile(editor)
       disposable = editor.onDidChangePath =>
         @updatedSelectedFile(editor)
 
+    @panesSubscription = atom.workspace.onDidChangeActivePaneItem (event) =>
+      console.log "Exoshader - Changed active panel"
+      @forceFileUpdate()
+
+
+  forceFileUpdate: ->
+    editor = atom.workspace.getActivePaneItem()
+    console.log "Exoshader - force file update:"+editor.getPath()
+    @updatedSelectedFile(editor)
 
 
   updatedSelectedFile: (editor)->
+        if @statusMessage is null
+          console.log "Cannot update in updateSelected File - status item not ready"
+          return
 
         fext =path.extname(editor.getPath())
         if  fext is ".fs" or fext is ".fsh"
@@ -86,7 +103,7 @@ module.exports = Exoshader =
                           pos = parts[2]
                           console.log("Error in shader at line:"+pos)
                           editor = atom.workspace.getActivePaneItem()
-                          editor.setCursorBufferPosition([pos-1,0])
+                          editor.setCursorBufferPosition([pos,0])
                         else
                           console.log("wrong number of parts in error "+parts.length)
 
@@ -155,5 +172,7 @@ module.exports = Exoshader =
 
   deactivate: ->
     @subscriptions.dispose()
+    @panesSubscription.dispose()
+    @editorsSubscription.dispose()
     @statusBarTile?.destroy()
     @statusBarTile = null
