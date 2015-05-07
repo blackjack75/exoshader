@@ -8,7 +8,7 @@
   ]
 'menu': [
   {
-    'label': 'Packages'
+    'label': 'Packages' 
     'submenu': [
       'label': 'exoshader'
       'submenu': [

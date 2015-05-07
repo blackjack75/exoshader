@@ -25,58 +25,60 @@ module.exports = Exoshader =
         @updatedSelectedFile(editor)
 
     @panesSubscription = atom.workspace.onDidChangeActivePaneItem (event) =>
-      #console.log "Exoshader - Changed active panel"
+      console.log "Exoshader - Changed active panel"
       @forceFileUpdate()
 
 
   forceFileUpdate: ->
     editor = atom.workspace.getActivePaneItem()
-    #console.log "Exoshader - force file update:"+editor.getPath()
-    @updatedSelectedFile(editor)
+
+    if (editor?)
+      console.log "Exoshader - force file update:"+editor.getPath()
+      @updatedSelectedFile(editor)
+
 
 
   updatedSelectedFile: (editor)->
-        if @statusMessage is null
+        if not @statusMessage?
           console.log "Cannot update in updateSelected File - status item not ready"
           return
 
-        fext =path.extname(editor.getPath())
+        fpath = editor.getPath()
+        if not path?
+           @statusMessage.textContent = ""
+           return
+
+        fext =path.extname(fpath)
         if  fext is ".fs" or fext is ".fsh"
           #editor.setGrammar(atom.grammars.grammarForScopeName('source.smarty'))
           console.log("exoShader - Updating File:"+editor.getPath());
-
-
-          #loopme = 0
-          #do checkLoop = ->
-          #  console.log("CheckLoop:"+loopme)
-          #  loopme += 1
-          #  setTimeout checkLoop, 500 unless loopme > 4
-
-          #@checkServer()
-          #Try aagain 1 second later, 2 seconds later too in case app takes time
           @statusMessage.textContent = " Server is reloading..."
 
-          @changeFileOnServer(editor.getPath())
+          @changeFileOnServer(editor)
 
         else
-         console.log("exoshader ignoring file save with extension:"+fext)
+          @statusMessage.textContent = ""
+          console.log("exoshader ignoring file save with extension:"+fext)
 
-  changeFileOnServer: (fpath)->
+  changeFileOnServer: (editor)->
+        fpath = editor.getPath()
         console.log "exoshader - notifying server of file change"
         theUrl = 'http://localhost:55556/loadshader/'+encodeURI(fpath)
         xhr = new XMLHttpRequest
         xhr.daddy = this
+        xhr.editor = editor
         xhr.onreadystatechange = ->
             xhr.daddy.handleAnswer(xhr)
         xhr.open "GET", theUrl, true
         xhr.send();
 
-  checkServer:->
+  checkServer: (editor)->
         console.log "exoshader - asking server for file status"
         #request.get { uri:, json: true }, (err, r, body) -> results = body
         theUrl = 'http://localhost:55556/status'
         xhr = new XMLHttpRequest
         xhr.daddy = this
+        xhr.editor = editor
         xhr.open "GET", theUrl, true
         xhr.onreadystatechange = ->
             xhr.daddy.handleAnswer(xhr)
@@ -98,8 +100,7 @@ module.exports = Exoshader =
                 if parts.length > 3
                   pos = parts[2]
                   console.log("Error in shader at line:"+pos)
-                  editor = atom.workspace.getActivePaneItem()
-                  editor.setCursorBufferPosition([pos,0])
+                  xhr.editor.setCursorBufferPosition([pos,0])
                 else
                   console.log("wrong number of parts in error "+parts.length)
 
@@ -152,11 +153,12 @@ module.exports = Exoshader =
 
     # Create message element in statusBar so we can update it later on save
     message = document.createElement('span')
-    message.textContent = "..."
-    message.classList.add('shaderOK')
+    message.textContent = ""
+    #message.classList.add('shaderOK')
     @statusMessage = message
     statusBar.addRightTile(item: message, priority: 100)
-    @checkServer()
+    #editor = atom.workspace.getActivePaneItem()
+    #@checkServer(editor)
 
   deactivate: ->
     @subscriptions.dispose()
